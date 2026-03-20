@@ -18,11 +18,20 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const DEFAULT_ALLOWED_ORIGINS = 'http://localhost:3000,https://frontend1-nu-ten.vercel.app';
+const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || DEFAULT_ALLOWED_ORIGINS)
+  .split(',')
+  .map(v => v.trim())
+  .filter(Boolean);
 
 // Middleware
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    // Allow non-browser requests (no Origin header)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
 }));
 app.use(express.json());
@@ -84,5 +93,5 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
-  console.log(`📱 Frontend URL: ${FRONTEND_URL}`);
+  console.log(`📱 Allowed frontend origins: ${allowedOrigins.join(', ')}`);
 });
