@@ -4,6 +4,32 @@ const { convertToLaTeX } = require('../services/cv-parser.service');
 const { Proficiency } = require('@prisma/client');
 const { uploadBufferToCloudinary } = require('../lib/cloudinary');
 
+function normalizeGender(value) {
+  if (!value) return null;
+  const key = String(value).trim().toUpperCase();
+  const map = {
+    MALE: 'MALE',
+    FEMALE: 'FEMALE',
+    OTHER: 'OTHER',
+    M: 'MALE',
+    F: 'FEMALE',
+  };
+  return map[key] || null;
+}
+
+function normalizeMaritalStatus(value) {
+  if (!value) return null;
+  const key = String(value).trim().toUpperCase();
+  const map = {
+    SINGLE: 'SINGLE',
+    UNMARRIED: 'SINGLE',
+    MARRIED: 'MARRIED',
+    DIVORCED: 'DIVORCED',
+    WIDOWED: 'WIDOWED',
+  };
+  return map[key] || null;
+}
+
 /**
  * Upload and process CV
  * POST /api/cv/upload
@@ -309,6 +335,8 @@ async function uploadCV(req, res) {
     // Store or update Candidate Profile
     if (parsedData.personalInformation) {
       const personalInfo = parsedData.personalInformation;
+      const genderEnum = normalizeGender(personalInfo.gender);
+      const maritalStatusEnum = normalizeMaritalStatus(personalInfo.maritalStatus);
       
       try {
         // Check if profile already exists for this candidate
@@ -344,8 +372,8 @@ async function uploadCV(req, res) {
               country: personalInfo.country ?? existingProfile.country,
               linkedinUrl: personalInfo.linkedinProfile ?? existingProfile.linkedinUrl,
               dateOfBirth: personalInfo.dateOfBirth ? new Date(personalInfo.dateOfBirth) : existingProfile.dateOfBirth,
-              gender: personalInfo.gender ?? existingProfile.gender,
-              maritalStatus: personalInfo.maritalStatus ?? existingProfile.maritalStatus,
+              gender: genderEnum ?? existingProfile.gender,
+              maritalStatus: maritalStatusEnum ?? existingProfile.maritalStatus,
               nationality: personalInfo.nationality ?? existingProfile.nationality,
               passportNumber: personalInfo.passportNumber ?? existingProfile.passportNumber,
               updatedAt: new Date(),
@@ -377,8 +405,8 @@ async function uploadCV(req, res) {
                     country: personalInfo.country ?? emailExists.country,
                     linkedinUrl: personalInfo.linkedinProfile ?? emailExists.linkedinUrl,
                     dateOfBirth: personalInfo.dateOfBirth ? new Date(personalInfo.dateOfBirth) : emailExists.dateOfBirth,
-                    gender: personalInfo.gender ?? emailExists.gender,
-                    maritalStatus: personalInfo.maritalStatus ?? emailExists.maritalStatus,
+                    gender: genderEnum ?? emailExists.gender,
+                    maritalStatus: maritalStatusEnum ?? emailExists.maritalStatus,
                     nationality: personalInfo.nationality ?? emailExists.nationality,
                     passportNumber: personalInfo.passportNumber ?? emailExists.passportNumber,
                     updatedAt: new Date(),
@@ -410,8 +438,8 @@ async function uploadCV(req, res) {
                 country: personalInfo.country || null,
                 linkedinUrl: personalInfo.linkedinProfile || null,
                 dateOfBirth: personalInfo.dateOfBirth ? new Date(personalInfo.dateOfBirth) : null,
-                gender: personalInfo.gender || null,
-                maritalStatus: personalInfo.maritalStatus || null,
+                gender: genderEnum,
+                maritalStatus: maritalStatusEnum,
                 nationality: personalInfo.nationality || null,
                 passportNumber: personalInfo.passportNumber || null,
               },
@@ -440,8 +468,8 @@ async function uploadCV(req, res) {
                   country: personalInfo.country ?? profileByEmail.country,
                   linkedinUrl: personalInfo.linkedinProfile ?? profileByEmail.linkedinUrl,
                   dateOfBirth: personalInfo.dateOfBirth ? new Date(personalInfo.dateOfBirth) : profileByEmail.dateOfBirth,
-                  gender: personalInfo.gender ?? profileByEmail.gender,
-                  maritalStatus: personalInfo.maritalStatus ?? profileByEmail.maritalStatus,
+                  gender: genderEnum ?? profileByEmail.gender,
+                  maritalStatus: maritalStatusEnum ?? profileByEmail.maritalStatus,
                   nationality: personalInfo.nationality ?? profileByEmail.nationality,
                   passportNumber: personalInfo.passportNumber ?? profileByEmail.passportNumber,
                   updatedAt: new Date(),
