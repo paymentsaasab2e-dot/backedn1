@@ -35,8 +35,8 @@ app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 // Health check with database connection test
 app.get('/health', async (req, res) => {
   try {
-    // Test database connection
-    await prisma.$queryRaw`SELECT 1`;
+    // MongoDB does not support Prisma's $queryRaw, so use a native ping command.
+    await prisma.$runCommandRaw({ ping: 1 });
     res.json({ 
       status: 'ok', 
       message: 'Server is running',
