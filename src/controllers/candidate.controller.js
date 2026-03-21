@@ -38,7 +38,7 @@ async function getAllCandidates(req, res) {
       fullName: candidate.profile?.fullName || 'N/A',
       email: candidate.profile?.email || 'N/A',
       phoneNumber: candidate.profile?.phoneNumber || 'N/A',
-      whatsappNumber: candidate.whatsappNumber,
+      whatsappNumber: candidate.whatsappNumber ?? 'N/A',
       countryCode: candidate.countryCode,
       isVerified: candidate.isVerified,
       createdAt: candidate.createdAt,

@@ -100,7 +100,8 @@ enum EmploymentType {
 
 model Candidate {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  whatsappNumber    String    @unique
+  // Nullable: legacy or email-only signups may not have WhatsApp set yet
+  whatsappNumber    String?   @unique
   countryCode       String    @default("+91")
   isVerified        Boolean   @default(false)
   createdAt         DateTime  @default(now())
